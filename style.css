@@ -9,6 +9,10 @@ body {
     overflow-x: hidden;
 }
 
+html {
+    scroll-snap-type: y proximity;
+}
+
 /* Dots Background */
 #dots-container {
     position: fixed;
@@ -70,6 +74,8 @@ body {
     justify-content: center;
     text-align: center;
     position: relative;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .hero h1 {
@@ -86,6 +92,7 @@ body {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 15px;
+    scroll-snap-align: start;
 }
 
 /* Navigation Menu Styling */
@@ -183,13 +190,20 @@ main p {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    html {
+        scroll-snap-type: y mandatory;
+    }
+
     .hero h1 {
         font-size: 3rem;
     }
 
     .content {
+        min-height: 100vh;
         padding: 3rem 1.5rem;
         width: 90%;
+        border-radius: 18px;
+        box-shadow: 0 20px 36px rgba(0, 0, 0, 0.08);
     }
 
     .shape {
@@ -205,15 +219,24 @@ main p {
 }
 
 @media (max-width: 480px) {
+    body {
+        background: radial-gradient(circle at 20% 25%, #fff8f0 0%, #ffffff 42%, #f8fbff 100%);
+    }
+
     .hero h1 {
-        font-size: 2.2rem;
+        font-size: clamp(1.85rem, 7.5vw, 2.3rem);
+        line-height: 1.2;
+        padding: 0 0.8rem;
     }
 
     .content {
-        padding: 2rem 1rem;
+        min-height: 100vh;
+        padding: 2.3rem 1rem;
         width: 95%;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(5px);
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.93);
+        backdrop-filter: blur(8px);
+        border-radius: 16px 16px 0 0;
     }
 
     .topic-list > li > a,
@@ -234,6 +257,7 @@ main p {
     .shape {
         width: 60px !important;
         height: 60px !important;
+        opacity: 0.45;
     }
     .triangle {
         border-left-width: 30px !important;
@@ -241,9 +265,39 @@ main p {
         border-bottom-width: 60px !important;
     }
 
-    /* Hide some shapes on very small screens to reduce clutter */
-    .shape.square[style*="left: 80%"],
+    .shape.square[style*="left: 80%"] {
+        left: 71% !important;
+        top: 66% !important;
+    }
+
+    .shape.square[style*="left: 90%"] {
+        left: 78% !important;
+        top: 9% !important;
+    }
+
     .shape.triangle[style*="left: 70%"] {
-        display: none;
+        left: 58% !important;
+        top: 26% !important;
+    }
+
+    .shape.circle[style*="top: 90%"] {
+        top: 82% !important;
+        left: 33% !important;
+    }
+
+    .shape.triangle[style*="top: 80%"] {
+        top: 74% !important;
+    }
+
+    /* Keep all decorative shapes visible after mobile repositioning. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-snap-type: none;
+    }
+
+    .shape {
+        animation: none;
     }
 }
