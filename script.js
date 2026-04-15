@@ -20,4 +20,52 @@ document.addEventListener('DOMContentLoaded', () => {
             dot.style.transform = `translateY(${moveY}px)`;
         });
     });
+
+    const submenuParents = Array.from(document.querySelectorAll('.has-submenu'));
+
+    const setExpanded = (parent, expanded) => {
+        const toggle = parent.querySelector('.submenu-toggle');
+        const submenu = parent.querySelector('.sub-topic-list');
+        if (!toggle || !submenu) {
+            return;
+        }
+
+        toggle.setAttribute('aria-expanded', String(expanded));
+        parent.classList.toggle('is-open', expanded);
+        submenu.hidden = !expanded;
+    };
+
+    const closeAllSubmenus = () => {
+        submenuParents.forEach(parent => setExpanded(parent, false));
+    };
+
+    submenuParents.forEach(parent => {
+        const toggle = parent.querySelector('.submenu-toggle');
+        if (!toggle) {
+            return;
+        }
+
+        setExpanded(parent, false);
+
+        toggle.addEventListener('click', event => {
+            event.preventDefault();
+            const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+            closeAllSubmenus();
+            setExpanded(parent, !isExpanded);
+        });
+    });
+
+    document.addEventListener('click', event => {
+        const clickedInsideSubmenu = submenuParents.some(parent => parent.contains(event.target));
+        if (!clickedInsideSubmenu) {
+            closeAllSubmenus();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            closeAllSubmenus();
+        }
+    });
 });

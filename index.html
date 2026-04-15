@@ -28,9 +28,16 @@
                 <li><a href="#">Matematikk R2</a></li>
                 <li><a href="#">Fysikk 2</a></li>
                 <li><a href="#">Norsk</a></li>
-                <li>
-                    <a href="#">Religion</a>
-                    <ul class="sub-topic-list">
+                <li class="has-submenu">
+                    <button
+                        type="button"
+                        class="submenu-toggle"
+                        aria-expanded="false"
+                        aria-controls="religion-submenu"
+                    >
+                        Religion
+                    </button>
+                    <ul id="religion-submenu" class="sub-topic-list" hidden>
                         <li><a href="Religion/hinduisme_tankekart.html">Hinduisme</a></li>
                         <li><a href="Religion/natur_tankekart.html">Natur i religionene</a></li>
                     </ul>

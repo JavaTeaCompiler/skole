@@ -93,17 +93,21 @@ nav {
     margin-bottom: 2rem;
 }
 
-ul.topic-list {
+.topic-list,
+.sub-topic-list {
     list-style: none;
+    margin: 0;
     padding: 0;
 }
 
-ul.topic-list > li {
+.topic-list > li {
     margin-bottom: 1rem;
 }
 
-ul.topic-list > li > a {
+.topic-list > li > a,
+.submenu-toggle {
     display: block;
+    width: 100%;
     padding: 1rem 1.5rem;
     color: #333;
     background-color: #f8f9fa;
@@ -111,34 +115,70 @@ ul.topic-list > li > a {
     font-weight: 500;
     border-radius: 8px;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
 }
 
-ul.topic-list > li > a:hover {
+.topic-list > li > a:hover,
+.submenu-toggle:hover,
+.submenu-toggle:focus-visible {
     background-color: #e9ecef;
     transform: translateY(-2px);
 }
 
-ul.sub-topic-list {
-    list-style: none;
-    padding-left: 1.5rem;
-    margin-top: 0.5rem;
+.submenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-ul.sub-topic-list li a {
-    display: block;
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    color: #555;
+.submenu-toggle::after {
+    content: "▾";
     font-size: 0.9rem;
+    transition: transform 0.2s ease;
 }
 
-ul.sub-topic-list li a:hover {
+.has-submenu.is-open .submenu-toggle::after {
+    transform: rotate(180deg);
+}
+
+.sub-topic-list {
+    margin-top: 0.6rem;
+    padding: 0.75rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.sub-topic-list[hidden] {
+    display: none;
+}
+
+.sub-topic-list li a {
+    display: block;
+    padding: 0.65rem 1rem;
+    background-color: #f2f4f6;
+    color: #555;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sub-topic-list li a:hover,
+.sub-topic-list li a:focus-visible {
+    background-color: #e6eaee;
     color: #000;
 }
 
 main p {
     text-align: center;
-    color: #666;
+    margin: 0;
+    line-height: 1.7;
+    color: #4a4a4a;
 }
 
 /* Responsive Design */
@@ -176,12 +216,17 @@ main p {
         backdrop-filter: blur(5px);
     }
 
-    ul.topic-list > li > a {
+    .topic-list > li > a,
+    .submenu-toggle {
         padding: 0.8rem 1rem;
         font-size: 1rem;
     }
 
-    ul.sub-topic-list li a {
+    .sub-topic-list {
+        padding: 0.55rem;
+    }
+
+    .sub-topic-list li a {
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
     }
