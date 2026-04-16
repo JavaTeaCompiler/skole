@@ -36,14 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const scrollState = {
             y: window.scrollY,
+            smoothedY: window.scrollY,
             velocity: 0,
             pulse: 0
         };
         const orientationState = {
             active: false,
             gamma: 0,
-            beta: 0
+            beta: 0,
+            neutralGamma: 0,
+            neutralBeta: 0,
+            calibrationSamples: 0,
+            permissionRequested: false
         };
+        const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+        const supportsOrientation = typeof DeviceOrientationEvent !== 'undefined';
 
         const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
@@ -51,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dotItems.length = 0;
             dotsContainer.innerHTML = '';
 
-            const dotCount = window.innerWidth < 700 ? 90 : 170;
+            const dotCount = window.innerWidth < 700 ? 52 : 160;
             for (let i = 0; i < dotCount; i++) {
                 const dot = document.createElement('div');
                 dot.classList.add('dot');
@@ -81,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     damping: randomBetween(0.82, 0.9),
                     gravityStrength: randomBetween(2800, 6200),
                     maxOffset: randomBetween(34, 68),
-                    scrollDepth: randomBetween(0.05, 0.2),
-                    scrollPush: randomBetween(0.006, 0.02),
+                    scrollDepth: randomBetween(0.01, 0.05),
+                    scrollPush: randomBetween(0.003, 0.01),
                     scrollSway: randomBetween(2, 8),
                     driftPhase: Math.random() * Math.PI * 2,
                     driftSpeed: randomBetween(0.0012, 0.0024),
@@ -125,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     damping: randomBetween(0.86, 0.92),
                     gravityStrength: randomBetween(6200, 12000),
                     maxOffset: randomBetween(48, 98),
-                    scrollDepth: randomBetween(0.02, 0.08),
-                    scrollPush: randomBetween(0.002, 0.006),
+                    scrollDepth: randomBetween(0.005, 0.02),
+                    scrollPush: randomBetween(0.0015, 0.004),
                     scrollSway: randomBetween(1.2, 3.8),
                     baseRotation,
                     rotVelocity: randomBetween(-0.2, 0.2),
@@ -153,12 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Scroll-aware anchor offset creates subtle field drift while preserving spring bounds.
-            const scrollAnchorY = item.anchorY + scrollState.y * item.scrollDepth;
+            const scrollAnchorY = item.anchorY + scrollState.smoothedY * item.scrollDepth;
             const scrollAnchorX = item.anchorX + Math.sin(time * 0.0012 + item.driftPhase) * item.scrollSway;
             fx += (scrollAnchorX - item.x) * item.spring;
             fy += (scrollAnchorY - item.y) * item.spring;
             fy += scrollState.velocity * item.scrollPush;
-            fx += Math.sin(time * 0.002 + item.driftPhase) * scrollState.pulse * 0.002;
+            fx += Math.sin(time * 0.002 + item.driftPhase) * scrollState.pulse * 0.0014;
 
             const driftTime = time * item.driftSpeed + item.driftPhase;
             fx += Math.cos(driftTime) * item.driftAmp * 0.004;
@@ -206,12 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             scrollState.velocity *= 0.9;
             scrollState.pulse *= 0.9;
+            scrollState.smoothedY += (scrollState.y - scrollState.smoothedY) * 0.08;
 
             cursor.idleTime += dt;
 
-            if (orientationState.active && window.innerWidth < 800) {
-                const targetX = window.innerWidth * 0.5 + (orientationState.gamma / 30) * (window.innerWidth * 0.4);
-                const targetY = window.innerHeight * 0.5 + (orientationState.beta / 30) * (window.innerHeight * 0.4);
+            if (orientationState.active && window.innerWidth < 920) {
+                const targetX = window.innerWidth * 0.5 + (orientationState.gamma / 34) * (window.innerWidth * 0.44);
+                const targetY = window.innerHeight * 0.5 + (orientationState.beta / 34) * (window.innerHeight * 0.44);
                 cursor.x += (targetX - cursor.x) * 0.08;
                 cursor.y += (targetY - cursor.y) * 0.08;
                 cursor.active = true;
@@ -245,41 +253,95 @@ document.addEventListener('DOMContentLoaded', () => {
             cursor.idleTime = 0;
         });
 
-        // iOS 13+ requires explicit permission via a user gesture to access device orientation
+        const resetOrientationCalibration = () => {
+            orientationState.neutralGamma = 0;
+            orientationState.neutralBeta = 0;
+            orientationState.calibrationSamples = 0;
+        };
+
+        // iOS 13+ requires explicit permission via user gesture before orientation events become available.
         const requestOrientationPermission = () => {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            if (orientationState.permissionRequested) return;
+            orientationState.permissionRequested = true;
+
+            if (
+                typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function'
+            ) {
                 DeviceOrientationEvent.requestPermission()
                     .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            orientationState.active = true;
+                        if (permissionState !== 'granted') {
+                            orientationState.permissionRequested = false;
                         }
                     })
-                    .catch(console.error);
+                    .catch(() => {
+                        orientationState.permissionRequested = false;
+                    });
             }
         };
-        window.addEventListener('touchstart', requestOrientationPermission, { once: true });
-        window.addEventListener('click', requestOrientationPermission, { once: true });
+        if (supportsOrientation && isCoarsePointer) {
+            window.addEventListener('pointerdown', requestOrientationPermission, { passive: true });
+            window.addEventListener('touchstart', requestOrientationPermission, { passive: true });
+            window.addEventListener('click', requestOrientationPermission, { passive: true });
+        }
 
-        window.addEventListener('deviceorientation', event => {
-            if (event.gamma !== null && event.beta !== null) {
-                orientationState.active = true;
-                let gamma = event.gamma; 
-                let beta = event.beta; 
-                // Consider resting position around beta=45 on mobile
-                beta -= 45;
-                gamma = Math.max(-45, Math.min(45, gamma));
-                beta = Math.max(-45, Math.min(45, beta));
-                orientationState.gamma = orientationState.gamma * 0.8 + gamma * 0.2;
-                orientationState.beta = orientationState.beta * 0.8 + beta * 0.2;
+        const handleOrientation = event => {
+            if (event.gamma === null || event.beta === null) {
+                return;
             }
-        });
+
+            orientationState.active = true;
+
+            const orientationAngle =
+                (screen.orientation && typeof screen.orientation.angle === 'number')
+                    ? screen.orientation.angle
+                    : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+            let measuredGamma = event.gamma;
+            let measuredBeta = event.beta;
+
+            // Keep tilt behavior natural even if the phone is in landscape.
+            if (orientationAngle === 90) {
+                measuredGamma = event.beta;
+                measuredBeta = -event.gamma;
+            } else if (orientationAngle === -90 || orientationAngle === 270) {
+                measuredGamma = -event.beta;
+                measuredBeta = event.gamma;
+            }
+
+            if (orientationState.calibrationSamples < 8) {
+                orientationState.neutralGamma += measuredGamma;
+                orientationState.neutralBeta += measuredBeta;
+                orientationState.calibrationSamples += 1;
+
+                if (orientationState.calibrationSamples === 8) {
+                    orientationState.neutralGamma /= 8;
+                    orientationState.neutralBeta /= 8;
+                }
+                return;
+            }
+
+            const gammaDelta = measuredGamma - orientationState.neutralGamma;
+            const betaDelta = measuredBeta - orientationState.neutralBeta;
+            const gamma = Math.max(-38, Math.min(38, gammaDelta));
+            const beta = Math.max(-38, Math.min(38, betaDelta));
+
+            orientationState.gamma = orientationState.gamma * 0.84 + gamma * 0.16;
+            orientationState.beta = orientationState.beta * 0.84 + beta * 0.16;
+        };
+
+        if (supportsOrientation && isCoarsePointer) {
+            // Use a single orientation stream to avoid duplicate events on some browsers.
+            window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+            window.addEventListener('orientationchange', resetOrientationCalibration, { passive: true });
+        }
 
         window.addEventListener('scroll', () => {
             const nextY = window.scrollY;
             const dy = nextY - scrollState.y;
             scrollState.y = nextY;
             scrollState.velocity = scrollState.velocity * 0.65 + dy * 0.35;
-            scrollState.pulse = Math.min(90, scrollState.pulse + Math.abs(dy) * 0.5);
+            scrollState.pulse = Math.min(48, scrollState.pulse + Math.abs(dy) * 0.24);
         }, { passive: true });
 
         let resizeTimer = null;
@@ -296,11 +358,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 initShapes();
                 cursor.x = window.innerWidth * 0.5;
                 cursor.y = window.innerHeight * 0.5;
+                scrollState.smoothedY = scrollState.y;
             }, 120);
         });
 
         createDotField();
         initShapes();
+        scrollState.smoothedY = scrollState.y;
         requestAnimationFrame(animate);
         }
     }
