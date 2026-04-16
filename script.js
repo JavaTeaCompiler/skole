@@ -245,6 +245,21 @@ document.addEventListener('DOMContentLoaded', () => {
             cursor.idleTime = 0;
         });
 
+        // iOS 13+ requires explicit permission via a user gesture to access device orientation
+        const requestOrientationPermission = () => {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            orientationState.active = true;
+                        }
+                    })
+                    .catch(console.error);
+            }
+        };
+        window.addEventListener('touchstart', requestOrientationPermission, { once: true });
+        window.addEventListener('click', requestOrientationPermission, { once: true });
+
         window.addEventListener('deviceorientation', event => {
             if (event.gamma !== null && event.beta !== null) {
                 orientationState.active = true;
@@ -268,7 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
 
         let resizeTimer = null;
+        let lastWidth = window.innerWidth;
         window.addEventListener('resize', () => {
+            // On mobile, scrolling up/down hides/shows the address bar, changing innerHeight and triggering 'resize'.
+            // Only re-create the dots if the width actually changes (e.g. rotating the phone) to prevent sudden jumps.
+            if (window.innerWidth === lastWidth) return;
+            lastWidth = window.innerWidth;
+
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 createDotField();
