@@ -248,6 +248,7 @@
 </head>
 <body>
     <main class="container">
+        <a class="top-link" href="index.html">Tilbake til forsiden</a>
         <section class="panel">
             <h1>Vårens vakreste eventyr 2026</h1>
 
@@ -404,8 +405,21 @@
 
                 const timelineRect = timeline.getBoundingClientRect();
                 const nodeRect = lastDoneNode.getBoundingClientRect();
-                const nodeCenterY = nodeRect.top + nodeRect.height / 2 - timelineRect.top;
-                const progress = Math.max(0, Math.min(100, ((nodeCenterY - lineStart) / totalLineLength) * 100));
+                const lastDoneIndex = stops.findIndex(stop => stop.classList.contains('is-done') && stop.querySelector('.node') === lastDoneNode);
+
+                let progressTargetY = nodeRect.top + nodeRect.height / 2 - timelineRect.top;
+
+                // Extend progress halfway toward the next stop so the green connector is clearly visible.
+                if (lastDoneIndex > -1 && lastDoneIndex < stops.length - 1) {
+                    const nextNode = stops[lastDoneIndex + 1].querySelector('.node');
+                    if (nextNode) {
+                        const nextNodeRect = nextNode.getBoundingClientRect();
+                        const nextCenterY = nextNodeRect.top + nextNodeRect.height / 2 - timelineRect.top;
+                        progressTargetY = (progressTargetY + nextCenterY) / 2;
+                    }
+                }
+
+                const progress = Math.max(0, Math.min(100, ((progressTargetY - lineStart) / totalLineLength) * 100));
                 timeline.style.setProperty('--progress', `${progress}%`);
             };
 
