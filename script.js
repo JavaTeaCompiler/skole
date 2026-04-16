@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
             velocity: 0,
             pulse: 0
         };
+        const orientationState = {
+            active: false,
+            gamma: 0,
+            beta: 0
+        };
 
         const randomBetween = (min, max) => Math.random() * (max - min) + min;
 
@@ -204,7 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cursor.idleTime += dt;
 
-            if (!cursor.active && cursor.idleTime > 1200) {
+            if (orientationState.active && window.innerWidth < 800) {
+                const targetX = window.innerWidth * 0.5 + (orientationState.gamma / 30) * (window.innerWidth * 0.4);
+                const targetY = window.innerHeight * 0.5 + (orientationState.beta / 30) * (window.innerHeight * 0.4);
+                cursor.x += (targetX - cursor.x) * 0.08;
+                cursor.y += (targetY - cursor.y) * 0.08;
+                cursor.active = true;
+                cursor.idleTime = 0;
+            } else if (!cursor.active && cursor.idleTime > 1200) {
                 const wanderX = window.innerWidth * (0.5 + Math.cos(time * 0.00027) * 0.2);
                 const wanderY = window.innerHeight * (0.46 + Math.sin(time * 0.00021) * 0.24);
                 cursor.x += (wanderX - cursor.x) * 0.03;
@@ -231,6 +243,20 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('pointerleave', () => {
             cursor.active = false;
             cursor.idleTime = 0;
+        });
+
+        window.addEventListener('deviceorientation', event => {
+            if (event.gamma !== null && event.beta !== null) {
+                orientationState.active = true;
+                let gamma = event.gamma; 
+                let beta = event.beta; 
+                // Consider resting position around beta=45 on mobile
+                beta -= 45;
+                gamma = Math.max(-45, Math.min(45, gamma));
+                beta = Math.max(-45, Math.min(45, beta));
+                orientationState.gamma = orientationState.gamma * 0.8 + gamma * 0.2;
+                orientationState.beta = orientationState.beta * 0.8 + beta * 0.2;
+            }
         });
 
         window.addEventListener('scroll', () => {
