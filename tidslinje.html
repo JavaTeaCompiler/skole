@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vårens vakreste eventyr 2026</title>
+    <style>
+        :root {
+            --bg-top: #fff7ef;
+            --bg-bottom: #eef6ff;
+            --card: rgba(255, 255, 255, 0.88);
+            --text: #213547;
+            --muted: #627489;
+            --line: #c6d3df;
+            --done: #1aa35d;
+            --active: #2c7be5;
+            --ring: #fdfefe;
+            --shadow: 0 20px 45px rgba(32, 57, 82, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 18% 16%, #ffe8d2 0%, rgba(255, 232, 210, 0) 36%),
+                radial-gradient(circle at 82% 84%, #dff0ff 0%, rgba(223, 240, 255, 0) 32%),
+                linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+            padding: clamp(1.2rem, 2.8vw, 2.6rem) 1rem clamp(2rem, 4vw, 3.4rem);
+        }
+
+        .container {
+            width: min(900px, 100%);
+            margin: 0 auto;
+        }
+
+        .top-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #23415e;
+            font-weight: 600;
+            margin-bottom: 1.3rem;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(35, 65, 94, 0.08);
+            border-radius: 999px;
+            padding: 0.52rem 0.88rem;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .top-link:hover,
+        .top-link:focus-visible {
+            transform: translateY(-2px);
+            background: #ffffff;
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: 22px;
+            padding: clamp(1.25rem, 3vw, 2.35rem);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+        }
+
+        h1 {
+            margin: 0 0 1.1rem;
+            font-size: clamp(1.55rem, 2.8vw, 2.4rem);
+            letter-spacing: 0.01em;
+            font-weight: 600;
+        }
+
+        .lead {
+            margin: 0.55rem 0 1.6rem;
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+        }
+
+        .timeline {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.95rem;
+            position: relative;
+            --progress: 0%;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            bottom: -6px;
+            width: 4px;
+            border-radius: 99px;
+            background: linear-gradient(
+                to bottom,
+                var(--done) 0,
+                var(--done) var(--progress),
+                var(--line) var(--progress),
+                var(--line) 100%
+            );
+        }
+
+        .stop {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            column-gap: 1rem;
+            align-items: start;
+        }
+
+        .node-wrap {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 0.35rem;
+            z-index: 1;
+        }
+
+        .node {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--line);
+            background: var(--ring);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+            transition: background-color 0.22s ease, border-color 0.22s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(54, 79, 104, 0.09);
+            border-radius: 14px;
+            padding: 0.9rem 1.05rem;
+        }
+
+        .meta {
+            font-size: 0.79rem;
+            color: #5f7389;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        .date {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 650;
+            line-height: 1.25;
+        }
+
+        .subjects {
+            margin: 0.35rem 0 0;
+            color: #40586e;
+            line-height: 1.5;
+        }
+
+        .stop.is-done .node {
+            border-color: var(--done);
+            background: var(--done);
+        }
+
+        .stop.is-next .node {
+            border-color: var(--active);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(44, 123, 229, 0.18);
+        }
+
+        .stop.is-next .card {
+            border-color: rgba(44, 123, 229, 0.32);
+            background: #ffffff;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1rem;
+            margin-top: 1.15rem;
+            color: #4a6077;
+            font-size: 0.9rem;
+            padding-left: calc(28px + 1rem);
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--line);
+            flex: 0 0 auto;
+        }
+
+        .legend-dot.done {
+            background: var(--done);
+        }
+
+        .legend-dot.next {
+            background: #ffffff;
+            border: 2px solid var(--active);
+            width: 12px;
+            height: 12px;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 1rem 0.7rem 1.8rem;
+            }
+
+            .panel {
+                border-radius: 18px;
+                padding: 1rem 0.9rem 1.2rem;
+            }
+
+            .stop {
+                grid-template-columns: 24px 1fr;
+                column-gap: 0.7rem;
+            }
+
+            .timeline::before {
+                left: 10px;
+            }
+
+            .card {
+                padding: 0.78rem 0.82rem;
+            }
+
+            .legend {
+                margin-top: 0.95rem;
+                padding-left: calc(24px + 0.7rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section class="panel">
+            <h1>Vårens vakreste eventyr 2026</h1>
+
+            <ol class="timeline" id="timeline">
+                <li class="stop" data-date="2026-04-28">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <div class="meta">Uke 18</div>
+                        <p class="date">28. april</p>
+                        <p class="subjects">Eksamenstrekk</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-04">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <div class="meta">Uke 19</div>
+                        <p class="date">4. mai</p>
+                        <p class="subjects">Fremmedspråk III, Psykologi 2</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-05">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">5. mai</p>
+                        <p class="subjects">Norsk hovedmål</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-06">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">6. mai</p>
+                        <p class="subjects">Sosialkunnskap</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-07">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">7. mai</p>
+                        <p class="subjects">Biologi 2</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-08">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">8. mai</p>
+                        <p class="subjects">Fysikk 2, Markedsføring og ledelse 2, MIP2</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-11">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <div class="meta">Uke 20</div>
+                        <p class="date">11. mai</p>
+                        <p class="subjects">Norsk sidemål</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-12">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">12. mai</p>
+                        <p class="subjects">Kjemi 2, Geofag 2, Økonomi og ledelse</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-13">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <p class="date">13. mai</p>
+                        <p class="subjects">R2, Rettslære 2, MUFO2</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-05-20">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <div class="meta">Uke 21</div>
+                        <p class="date">20. mai</p>
+                        <p class="subjects">Fremmedspråk I+II og II</p>
+                    </article>
+                </li>
+
+                <li class="stop" data-date="2026-06-19">
+                    <div class="node-wrap"><span class="node" aria-hidden="true"></span></div>
+                    <article class="card">
+                        <div class="meta">Juni</div>
+                        <p class="date">19. juni</p>
+                        <p class="subjects">Sommerferie</p>
+                    </article>
+                </li>
+            </ol>
+
+            <div class="legend" aria-hidden="true">
+                <span><i class="legend-dot done"></i> Overstått</span>
+                <span><i class="legend-dot next"></i> Neste stopp</span>
+                <span><i class="legend-dot"></i> Kommer</span>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const timeline = document.getElementById('timeline');
+            const stops = Array.from(document.querySelectorAll('.stop'));
+            const today = new Date();
+            const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            const updateTimeline = () => {
+                let firstUpcomingIndex = -1;
+
+                stops.forEach((stop, index) => {
+                    stop.classList.remove('is-done', 'is-next');
+
+                    const dateValue = stop.getAttribute('data-date');
+                    const eventDate = dateValue ? new Date(dateValue + 'T00:00:00') : null;
+                    const isDone = Boolean(eventDate && eventDate < startOfToday);
+
+                    if (isDone) {
+                        stop.classList.add('is-done');
+                    } else if (firstUpcomingIndex === -1) {
+                        firstUpcomingIndex = index;
+                    }
+                });
+
+                if (firstUpcomingIndex !== -1) {
+                    stops[firstUpcomingIndex].classList.add('is-next');
+                }
+
+                const doneStops = stops.filter(stop => stop.classList.contains('is-done'));
+                if (!timeline || !stops.length) {
+                    return;
+                }
+
+                const lineStart = 8;
+                const lineExtension = 24;
+                const totalLineLength = timeline.scrollHeight + lineExtension - lineStart;
+
+                if (!doneStops.length || totalLineLength <= 0) {
+                    timeline.style.setProperty('--progress', '0%');
+                    return;
+                }
+
+                const lastDoneNode = doneStops[doneStops.length - 1].querySelector('.node');
+                if (!lastDoneNode) {
+                    timeline.style.setProperty('--progress', '0%');
+                    return;
+                }
+
+                const timelineRect = timeline.getBoundingClientRect();
+                const nodeRect = lastDoneNode.getBoundingClientRect();
+                const nodeCenterY = nodeRect.top + nodeRect.height / 2 - timelineRect.top;
+                const progress = Math.max(0, Math.min(100, ((nodeCenterY - lineStart) / totalLineLength) * 100));
+                timeline.style.setProperty('--progress', `${progress}%`);
+            };
+
+            updateTimeline();
+            window.addEventListener('resize', updateTimeline);
+        });
+    </script>
+</body>
+</html>
