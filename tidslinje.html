@@ -181,6 +181,53 @@
             background: #ffffff;
         }
 
+        .countdown {
+            margin-top: 0.7rem;
+            padding-top: 0.7rem;
+            border-top: 1px dashed rgba(44, 123, 229, 0.28);
+        }
+
+        .countdown-label {
+            margin: 0 0 0.45rem;
+            color: #2e4d68;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.45rem;
+        }
+
+        .countdown-unit {
+            background: rgba(44, 123, 229, 0.07);
+            border: 1px solid rgba(44, 123, 229, 0.15);
+            border-radius: 10px;
+            padding: 0.42rem 0.34rem;
+            text-align: center;
+        }
+
+        .countdown-value {
+            display: block;
+            font-size: 1.06rem;
+            font-weight: 700;
+            color: #1f3d5a;
+            line-height: 1.12;
+        }
+
+        .countdown-unit-label {
+            display: block;
+            margin-top: 0.14rem;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #4f6880;
+            font-weight: 700;
+        }
+
         .legend {
             display: flex;
             flex-wrap: wrap;
@@ -359,18 +406,82 @@
         document.addEventListener('DOMContentLoaded', () => {
             const timeline = document.getElementById('timeline');
             const stops = Array.from(document.querySelectorAll('.stop'));
-            const today = new Date();
-            const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            const createCountdownElement = () => {
+                const countdown = document.createElement('div');
+                countdown.className = 'countdown';
+                countdown.innerHTML = `
+                    <p class="countdown-label">Time to Tribulation</p>
+                    <div class="countdown-grid">
+                        <div class="countdown-unit">
+                            <span class="countdown-value" data-unit="days">0</span>
+                            <span class="countdown-unit-label">Dager</span>
+                        </div>
+                        <div class="countdown-unit">
+                            <span class="countdown-value" data-unit="hours">00</span>
+                            <span class="countdown-unit-label">Timer</span>
+                        </div>
+                        <div class="countdown-unit">
+                            <span class="countdown-value" data-unit="minutes">00</span>
+                            <span class="countdown-unit-label">Min</span>
+                        </div>
+                        <div class="countdown-unit">
+                            <span class="countdown-value" data-unit="seconds">00</span>
+                            <span class="countdown-unit-label">Sek</span>
+                        </div>
+                    </div>
+                `;
+                return countdown;
+            };
+
+            const getEventDateTime = (dateValue) => {
+                if (!dateValue) {
+                    return null;
+                }
+
+                // All events are treated as starting at 09:00 local time.
+                return new Date(`${dateValue}T09:00:00`);
+            };
+
+            const updateCountdownValues = (countdownElement, targetDate) => {
+                const now = new Date();
+                const remaining = Math.max(0, targetDate.getTime() - now.getTime());
+                const totalSeconds = Math.floor(remaining / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                const values = {
+                    days: String(days),
+                    hours: String(hours).padStart(2, '0'),
+                    minutes: String(minutes).padStart(2, '0'),
+                    seconds: String(seconds).padStart(2, '0')
+                };
+
+                Object.entries(values).forEach(([unit, value]) => {
+                    const el = countdownElement.querySelector(`[data-unit="${unit}"]`);
+                    if (el) {
+                        el.textContent = value;
+                    }
+                });
+            };
 
             const updateTimeline = () => {
+                const now = new Date();
                 let firstUpcomingIndex = -1;
 
                 stops.forEach((stop, index) => {
                     stop.classList.remove('is-done', 'is-next');
 
+                    const existingCountdown = stop.querySelector('.countdown');
+                    if (existingCountdown) {
+                        existingCountdown.remove();
+                    }
+
                     const dateValue = stop.getAttribute('data-date');
-                    const eventDate = dateValue ? new Date(dateValue + 'T00:00:00') : null;
-                    const isDone = Boolean(eventDate && eventDate < startOfToday);
+                    const eventDate = getEventDateTime(dateValue);
+                    const isDone = Boolean(eventDate && eventDate <= now);
 
                     if (isDone) {
                         stop.classList.add('is-done');
@@ -380,7 +491,18 @@
                 });
 
                 if (firstUpcomingIndex !== -1) {
-                    stops[firstUpcomingIndex].classList.add('is-next');
+                    const nextStop = stops[firstUpcomingIndex];
+                    nextStop.classList.add('is-next');
+
+                    const card = nextStop.querySelector('.card');
+                    const dateValue = nextStop.getAttribute('data-date');
+                    const eventDate = getEventDateTime(dateValue);
+
+                    if (card && eventDate) {
+                        const countdown = createCountdownElement();
+                        card.appendChild(countdown);
+                        updateCountdownValues(countdown, eventDate);
+                    }
                 }
 
                 const doneStops = stops.filter(stop => stop.classList.contains('is-done'));
@@ -425,6 +547,7 @@
 
             updateTimeline();
             window.addEventListener('resize', updateTimeline);
+            setInterval(updateTimeline, 1000);
         });
     </script>
 </body>
