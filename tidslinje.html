@@ -69,6 +69,67 @@
             border: 1px solid rgba(255, 255, 255, 0.72);
         }
 
+        .motivation {
+            position: relative;
+            margin: 0 0 1rem;
+            padding: clamp(1rem, 2.3vw, 1.5rem) clamp(1rem, 2.4vw, 1.7rem);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(250, 254, 255, 0.84));
+            border: 1px solid rgba(36, 80, 114, 0.14);
+            border-radius: 18px;
+            box-shadow: 0 14px 30px rgba(33, 62, 91, 0.12);
+            overflow: hidden;
+        }
+
+        .motivation::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 8% 10%, rgba(255, 210, 163, 0.36), transparent 38%),
+                        radial-gradient(circle at 90% 86%, rgba(131, 190, 255, 0.26), transparent 35%);
+            pointer-events: none;
+        }
+
+        .motivation-title {
+            margin: 0 0 0.6rem;
+            font-size: clamp(0.9rem, 1.6vw, 1.04rem);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #2b4c69;
+            position: relative;
+        }
+
+        .motivation blockquote {
+            margin: 0;
+            padding: 0.2rem 0 0.15rem 0.9rem;
+            border-left: 4px solid rgba(44, 123, 229, 0.45);
+            position: relative;
+            z-index: 1;
+        }
+
+        .motivation blockquote::before {
+            content: "\201C";
+            position: absolute;
+            left: -0.18rem;
+            top: -0.6rem;
+            font-size: 2.35rem;
+            line-height: 1;
+            color: rgba(44, 123, 229, 0.28);
+            font-weight: 700;
+        }
+
+        .motivation p {
+            margin: 0;
+            color: #21405d;
+            font-size: clamp(0.97rem, 1.55vw, 1.06rem);
+            line-height: 1.68;
+            text-wrap: pretty;
+        }
+
+        .motivation p + p {
+            margin-top: 0.65rem;
+        }
+
         h1 {
             margin: 0 0 1.1rem;
             font-size: clamp(1.55rem, 2.8vw, 2.4rem);
@@ -273,6 +334,20 @@
                 padding: 1rem 0.9rem 1.2rem;
             }
 
+            .motivation {
+                border-radius: 15px;
+                margin-bottom: 0.8rem;
+                padding: 0.9rem 0.85rem 0.95rem;
+            }
+
+            .motivation blockquote {
+                padding-left: 0.72rem;
+            }
+
+            .motivation p {
+                line-height: 1.58;
+            }
+
             .stop {
                 grid-template-columns: 24px 1fr;
                 column-gap: 0.7rem;
@@ -296,6 +371,25 @@
 <body>
     <main class="container">
         <a class="top-link" href="index.html">Tilbake til forsiden</a>
+        <section class="motivation" aria-label="Motivasjonsdikt">
+            <p class="motivation-title">Motivasjon før innspurten</p>
+            <blockquote>
+                <p>Sleten her jeg ligger, skulle ønske jeg var pigger,<br>
+                gruer meg til trekket, mens om lette fag jeg tigger.<br>
+                Blir det nynorsk eller matte? Får jeg velge tema fritt?<br>
+                Vil jeg vise hva jeg duger, kjenne pensum sitter litt?</p>
+
+                <p>Blek i fjeset mens jeg svetter, etter altfor mange netter,<br>
+                hvor jeg desperat har pugget alt det sensor kanskje retter.<br>
+                Trengs et under fra det høye for at dette skal gå bra,<br>
+                vær så snill å gi meg faget som jeg aller helst vil ha!</p>
+
+                <p>Prøv å puste helt med magen, selv om nervene står i spenn,<br>
+                tretten lange år er over, du får nattesøvn igjen.<br>
+                Uansett hva trekket bringer når du logger inn med gru:<br>
+                Dette er din siste innspurt, og den tøffeste er du!</p>
+            </blockquote>
+        </section>
         <section class="panel">
             <h1>Vårens vakreste eventyr 2026</h1>
 
